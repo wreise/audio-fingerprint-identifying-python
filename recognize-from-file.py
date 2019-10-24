@@ -1,9 +1,17 @@
-from libs.reader_microphone import FileReader
+from libs.reader_file import FileReader
+import argparse
 
-song = None
-seconds = 5
+#song = None
+#seconds = 5
 
-r = FileReader(123)
-r.recognize(seconds=seconds)
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-s', '--seconds', default = 5)
+    parser.add_argument('-f', '--file_name')
+    args = parser.parse_args()
 
-print(song)
+    file_name, seconds = args.file_name, args.seconds
+    r = FileReader(filename = file_name)
+    r.recognize(seconds= seconds)
+
+    print(song)
