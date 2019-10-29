@@ -81,6 +81,11 @@ class SqliteDatabase(Database):
         rows = self.executeOne(query)
         return int(rows[0])
 
+    def get_hashes_for_song(self, song_id):
+        query = 'SELECT hash, offset FROM %s WHERE song_fk = %d' % (self.TABLE_FINGERPRINTS, song_id)
+        rows = self.executeAll(query)
+        return rows
+
     def return_matches(self, hashes):
         def grouper(iterable, n, fillvalue=None):
             args = [iter(iterable)] * n
