@@ -2,6 +2,7 @@ import hashlib
 import numpy as np
 import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
+from libs.reader_file import FileReader
 
 from termcolor import colored
 from scipy.ndimage.filters import maximum_filter
@@ -207,3 +208,15 @@ def align_matches(db, matches):
         "OFFSET" : int(largest),
         "OFFSET_SECS" : nseconds
     }
+
+def get_dict_for_file(file_name):
+    reader = FileReader(filename = file_name)
+    audio = reader.parse_audio()
+    data = audio['channels']
+
+    hashes = set()
+    for channel in data:
+        channel_hashes = fingerprint(channel)
+        hashes |= set(channel_hashes)
+    dict_song = {hash: offset for hash, offset in hashes}
+    return dict_song

@@ -32,7 +32,7 @@ if __name__ == '__main__':
         #  channeln+1, channel_amount, len(m)
         #))
     m = [m for m in matches]
-    song = fingerprint.align_matches(m)
+    song = fingerprint.align_matches(db, m)
     print(song)
     #except Exception as e:
     #    print('Did not manage to get to the end', e)
