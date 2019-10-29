@@ -194,7 +194,7 @@ def align_matches(db, matches):
             largest_count = diff_counter[diff][sid]
             song_id = sid
 
-    songM = self.get_song_by_id(song_id)
+    songM = db.get_song_by_id(song_id)
 
     nseconds = round(float(largest) / DEFAULT_FS *
                      DEFAULT_WINDOW_SIZE *
