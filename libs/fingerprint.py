@@ -95,7 +95,7 @@ def fingerprint(channel_samples, Fs=DEFAULT_FS,
     local_maxima = get_2D_peaks(arr2D, plot=plots, amp_min=amp_min)
 
     msg = '   local_maxima: %d of frequency & time pairs'
-    print colored(msg, attrs=['dark']) % len(local_maxima)
+    print(colored(msg, attrs=['dark']) % len(local_maxima))
 
     # return hashes
     return generate_hashes(local_maxima, fan_value=fan_value)
@@ -138,7 +138,7 @@ def get_2D_peaks(arr2D, plot=False, amp_min=DEFAULT_AMP_MIN):
       plt.gca().invert_yaxis()
       plt.show()
 
-    return zip(frequency_idx, time_idx)
+    return peaks_filtered #zip(frequency_idx, time_idx), len(frequency_idx)
 
 # Hash list structure: sha1_hash[0:20] time_offset
 # example: [(e05b341a9b77a51fd26, 32), ... ]
@@ -164,5 +164,46 @@ def generate_hashes(peaks, fan_value=DEFAULT_FAN_VALUE):
 
           # check if delta is between min & max
           if t_delta >= MIN_HASH_TIME_DELTA and t_delta <= MAX_HASH_TIME_DELTA:
-            h = hashlib.sha1("%s|%s|%s" % (str(freq1), str(freq2), str(t_delta)))
-            yield (h.hexdigest()[0:FINGERPRINT_REDUCTION], t1)
+            #h = hashlib.sha1("%s|%s|%s".format(str(freq1), str(freq2), str(t_delta)).encode('utf8'))
+            h = hashlib.sha1("{0}|{1}|{2}".format(str(freq1), str(freq2), str(t_delta)).encode('utf8'))
+            yield (h.hexdigest()[0:FINGERPRINT_REDUCTION], int(t1))
+            #yield ("{0}|{1}|{2}".format(str(freq1), str(freq2), str(t_delta)), t1)
+
+def find_matches(db, samples, Fs=DEFAULT_FS):
+    hashes = fingerprint(samples, Fs=Fs)
+    return db.return_matches(hashes)
+
+def align_matches(db, matches):
+    diff_counter = {}
+    largest = 0
+    largest_count = 0
+    song_id = -1
+    for tup in matches:
+        sid, diff = tup
+
+        if diff not in diff_counter:
+            diff_counter[diff] = {}
+
+        if sid not in diff_counter[diff]:
+            diff_counter[diff][sid] = 0
+
+        diff_counter[diff][sid] += 1
+
+        if diff_counter[diff][sid] > largest_count:
+            largest = diff
+            largest_count = diff_counter[diff][sid]
+            song_id = sid
+
+    songM = self.get_song_by_id(song_id)
+
+    nseconds = round(float(largest) / DEFAULT_FS *
+                     DEFAULT_WINDOW_SIZE *
+                     DEFAULT_OVERLAP_RATIO, 5)
+
+    return {
+        "SONG_ID" : song_id,
+        "SONG_NAME" : songM[1],
+        "CONFIDENCE" : largest_count,
+        "OFFSET" : int(largest),
+        "OFFSET_SECS" : nseconds
+    }
