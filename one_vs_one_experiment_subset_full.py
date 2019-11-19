@@ -55,5 +55,5 @@ if __name__ == '__main__':
         for r in tqdm(p.imap_unordered(process_row, dat.head(20).iterrows()), total = pairs_df.shape[0]):
             results.append(r)
 
-    with open('one_vs_one_alignments.json', 'w') as f_alignments:
+    with open('one_vs_one_alignments_subset.json', 'w') as f_alignments:
         json.dump(results, f_alignments, cls = NpEncoder)
