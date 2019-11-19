@@ -31,8 +31,8 @@ def process_pair(s_name1, s_name2):
     offsets = [[song_1[c], song_2[c]] for c in common_keys]
 
     mode, count = stats.mode(np.diff(offsets, axis = 1), axis = None)
-    #return (s_name1, s_name2, offsets), (s_name1, s_name2, mode[0], count[0])
-    return (s_name1, s_name2, mode[0], count[0])
+    return (s_name1, s_name2, offsets)#, (s_name1, s_name2, mode[0], count[0])
+    #return (s_name1, s_name2, mode[0], count[0])
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -40,6 +40,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     pairs_df = pd.read_pickle(args.file)
+    dat = pairs_df[(pairs_df['obf_type'] == 'tempo') or (pairs_df['obf_type'] == '')]
 
     def process_row(ar):
         pair = ar[1]
@@ -51,7 +52,7 @@ if __name__ == '__main__':
 
     results = []
     with multiprocessing.Pool(3) as p:
-        for r in tqdm(p.imap_unordered(process_row, pairs_df.iterrows()), total = pairs_df.shape[0]):
+        for r in tqdm(p.imap_unordered(process_row, dat.head(20).iterrows()), total = pairs_df.shape[0]):
             results.append(r)
 
     with open('one_vs_one_alignments.json', 'w') as f_alignments:
